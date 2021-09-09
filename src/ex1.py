@@ -1,6 +1,5 @@
 import cv2 as cv
-import sys
-import os
+import math
 import numpy as np
 
 framgments_folder_path = "../frag_eroded/"
@@ -42,31 +41,33 @@ def add_fragment_to_goal_image(fragment_info, fragment_img, goal_image) -> None:
     fragment_coord_x = 0
 
     # Iterate each one of the fragment pixels
-    for column in fragment_img:
-        # Find the x coodinate of the pixel on the goal image
-        goal_image_fragment_x = fragment_info["x"] + fragment_coord_x
+    for row in fragment_img:
+        # Find the y coodinate of the pixel on the goal image
+        goal_image_fragment_y = fragment_info["y"] - \
+            int(fragment_img.shape[0] / 2) + fragment_coord_y
         # Check that we are the fragment image isn't going to be out of the image
-        if goal_image_fragment_x < 0 or goal_image_fragment_x >= GOAL_IMAGE_WIDTH:
+        if goal_image_fragment_y < 0 or goal_image_fragment_y >= GOAL_IMAGE_HEIGHT:
             continue
 
-        for pixel in reversed(column):
+        for pixel in row:
             # Because goal image is in jpg (R, G, B) and fragment_image  if alpha > 0 : add pixel to goal_image
-            if pixel[3] > 0:
+            if pixel[3] > 200:
                 # The alpha is > 0 : the pixel isn't tranparent
-                # Find the y coodinate of the pixel on the goal image
-                goal_image_fragment_y = fragment_info["y"] + fragment_coord_y
+                # Find the x coodinate of the pixel on the goal image
+                goal_image_fragment_x = fragment_info["x"] - int(
+                    fragment_img.shape[1] / 2) + fragment_coord_x
                 # Check that we are the fragment image isn't going to be out of the image
-                if goal_image_fragment_y < 0 or goal_image_fragment_y >= GOAL_IMAGE_HEIGHT:
+                if goal_image_fragment_x < 0 or goal_image_fragment_x >= GOAL_IMAGE_WIDTH:
                     continue
 
                 # Add the pixel to the goal image
                 goal_image[goal_image_fragment_y][goal_image_fragment_x] = [
                     pixel[0], pixel[1], pixel[2]]
 
-            fragment_coord_y += 1
+            fragment_coord_x += 1
 
-        fragment_coord_x += 1
-        fragment_coord_y = 0
+        fragment_coord_y += 1
+        fragment_coord_x = 0
 
 
 # Load the fragments informations
@@ -92,7 +93,7 @@ background = cv.addWeighted(original_img, ORIGINAL_IMAGE_OPACITY,
 # cv.imshow("background", background)
 k = cv.waitKey(0)
 
-for fragment in fragments_coordinates[:10]:
+for fragment in fragments_coordinates:
     # Load fragment (keeps the alpha channel that allows transparency)
     fragment_img = cv.imread(cv.samples.findFile(
         framgments_folder_path + fragment["image_name"]), cv.IMREAD_UNCHANGED)
@@ -103,7 +104,7 @@ for fragment in fragments_coordinates[:10]:
     # Get fragment size (matrix length)
     cols_f, rows_f, _ = fragment_img.shape
     print("name : " + fragment["image_name"] + " x : " + str(fragment["x"]) +
-          "y : " + str(fragment["y"]) + " h : " + str(cols_f) + " w : " + str(rows_f))
+          " y : " + str(fragment["y"]) + " h : " + str(cols_f) + " w : " + str(rows_f))
 
     # Rotate the image
     # XXX: For now we supposed that the pivot point is the center
@@ -117,7 +118,7 @@ for fragment in fragments_coordinates[:10]:
 
     # Add the fragment to the main image
     add_fragment_to_goal_image(fragment, rotated_fragment, background)
-    # cv.imshow("frag " + fragment["image_name"]  , rotated_fragment)
+
 cv.imshow("Goal image with a new fragment", background)
 
 k = cv.waitKey(0)
