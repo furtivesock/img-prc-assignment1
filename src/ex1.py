@@ -34,37 +34,27 @@ def load_fragments() -> list:
     return fragments_coordinates
 
 def add_fragment_to_goal_image(fragment_info, fragment_img, goal_image) -> None:
-    # TODO : iterate each one of the fragment pixels
-    # TODO : because goal image is in jpg (R, G, B) and fragment_image  if alpha > 0 : add pixel to goal_image
     # XXX: By guessing that the coordinates are on the botom left of the image
-
-    total_pixel = fragment_img.shape[0] * fragment_img.shape[1] 
-    missed_pixels = 0
 
     fragment_coord_y = 0 
     fragment_coord_x = 0
 
+    # Iterate each one of the fragment pixels
     for column in fragment_img: 
         # Find the x coodinate of the pixel on the goal image
         goal_image_fragment_x = fragment_info["x"] + fragment_coord_x
         # Check that we are the fragment image isn't going to be out of the image
         if goal_image_fragment_x < 0 or goal_image_fragment_x >= GOAL_IMAGE_WIDTH :
-            # print('Waring : fragment x is out of the image')
-            # print(fragment_info)
-            missed_pixels += 1
             continue
 
-
-        for pixel in column:
+        for pixel in reversed(column) :
+            # Because goal image is in jpg (R, G, B) and fragment_image  if alpha > 0 : add pixel to goal_image
             if pixel[3] > 0:
                 # The alpha is > 0 : the pixel isn't tranparent
                 # Find the y coodinate of the pixel on the goal image
                 goal_image_fragment_y = fragment_info["y"] + fragment_coord_y
                 # Check that we are the fragment image isn't going to be out of the image
                 if goal_image_fragment_y < 0 or goal_image_fragment_y >= GOAL_IMAGE_HEIGHT :
-                    # print('Waring : fragment y is out of the image')
-                    # print(fragment_info)
-                    missed_pixels += 1
                     continue     
                          
                 # Add the pixel to the goal image
@@ -74,8 +64,6 @@ def add_fragment_to_goal_image(fragment_info, fragment_img, goal_image) -> None:
 
         fragment_coord_x += 1
         fragment_coord_y = 0
-
-    print('missed pixel ' + str(missed_pixels) + ' / ' + str(total_pixel))
 
 
 # Load the fragments informations
@@ -121,7 +109,7 @@ for fragment in fragments_coordinates[:10]:
 
     # Add the fragment to the main image  
     add_fragment_to_goal_image(fragment, rotated_fragment, background)
-    cv.imshow("Goal image with a new fragment", background)
-    cv.imshow("frag " + fragment["image_name"]  , rotated_fragment)
+    # cv.imshow("frag " + fragment["image_name"]  , rotated_fragment)
+cv.imshow("Goal image with a new fragment", background)
 
 k = cv.waitKey(0)
