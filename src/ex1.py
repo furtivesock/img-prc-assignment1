@@ -13,32 +13,99 @@ ORIGINAL_FILENAME = "Michelangelo_ThecreationofAdam_1707x775.jpg"
 GOAL_IMAGE_WIDTH = 1707
 GOAL_IMAGE_HEIGHT = 775
 
-# Load the fragments coodinates
-fragments_coordinates = []
-with open('../fragments.txt') as f:
-    lines = f.read().split('\n')
+def load_fragments() -> list:
+    # Load the fragments informations
+    fragments_coordinates = []
+    with open('../fragments.txt') as f:
+        lines = f.read().split('\n')
 
-    for line in lines:
-        info = line.split(' ')
-        if len(info) == 4:
-            fragments_coordinates.append({
-                "num": int(info[0]),
-                "x": int(info[1]),
-                "y": int(info[2]),
-                "rotation": float(info[3]),
-                "image_name": "frag_eroded_" + str(info[0]) + ".png" 
-            })
+        for line in lines:
+            info = line.split(' ')
+            # Info = [2, 575, 640, -54.0116]
+            if len(info) == 4:
+                fragments_coordinates.append({
+                    "num": int(info[0]),
+                    "x": int(info[1]),
+                    "y": int(info[2]),
+                    "rotation": float(info[3]),
+                    "image_name": "frag_eroded_" + str(info[0]) + ".png" 
+                })
 
-# TODO: Init background image with the original
+    return fragments_coordinates
+
+def add_fragment_to_goal_image(fragment_info, fragment_img, goal_image) -> None:
+    # TODO : iterate each one of the fragment pixels
+    # TODO : because goal image is in jpg (R, G, B) and fragment_image  if alpha > 0 : add pixel to goal_image
+    # XXX: By guessing that the coordinates are on the botom left of the image
+
+    total_pixel = fragment_img.shape[0] * fragment_img.shape[1] 
+    missed_pixels = 0
+
+    fragment_coord_y = 0 
+    fragment_coord_x = 0
+
+    for column in fragment_img: 
+        # Find the x coodinate of the pixel on the goal image
+        goal_image_fragment_x = fragment_info["x"] + fragment_coord_x
+        # Check that we are the fragment image isn't going to be out of the image
+        if goal_image_fragment_x < 0 or goal_image_fragment_x >= GOAL_IMAGE_WIDTH :
+            # print('Waring : fragment x is out of the image')
+            # print(fragment_info)
+            missed_pixels += 1
+            continue
+
+
+        for pixel in column:
+            if pixel[3] > 0:
+                # The alpha is > 0 : the pixel isn't tranparent
+                # Find the y coodinate of the pixel on the goal image
+                goal_image_fragment_y = fragment_info["y"] + fragment_coord_y
+                # Check that we are the fragment image isn't going to be out of the image
+                if goal_image_fragment_y < 0 or goal_image_fragment_y >= GOAL_IMAGE_HEIGHT :
+                    # print('Waring : fragment y is out of the image')
+                    # print(fragment_info)
+                    missed_pixels += 1
+                    continue     
+                         
+                # Add the pixel to the goal image
+                goal_image[goal_image_fragment_y][goal_image_fragment_x] = [pixel[0], pixel[1], pixel[2]]
+                
+            fragment_coord_y += 1 
+
+        fragment_coord_x += 1
+        fragment_coord_y = 0
+
+    print('missed pixel ' + str(missed_pixels) + ' / ' + str(total_pixel))
+
+
+# Load the fragments informations
+fragments_coordinates = load_fragments()
+
+# Load the original image
 # XXX: Maybe problem with the used flag (see alpha channel)
-original_img = cv.imread("../" + ORIGINAL_FILENAME, cv.IMREAD_GRAYSCALE)
+original_img = cv.imread("../" + ORIGINAL_FILENAME, cv.IMREAD_UNCHANGED)
+# [[[0, 0, 0], ... ], ...]
+# [B, G, R]
 
-for fragment in fragments_coordinates[:2]:
+# Set a light background with the original image
+# The clear background will help us understand how the fragments match
+# Add a low alpha channel to the original_img
+ORIGINAL_IMAGE_OPACITY = 0.3
+cols, rows, _ = original_img.shape
+white_background = np.full((cols, rows, 3), 255, dtype=np.uint8)
+
+background = cv.addWeighted(original_img, ORIGINAL_IMAGE_OPACITY, white_background, 1 - ORIGINAL_IMAGE_OPACITY, 0)
+
+# cv.imshow("Goal image", original_img)
+# cv.imshow("background", background)
+k = cv.waitKey(0)
+
+for fragment in fragments_coordinates[:10]:
     # Load fragment (keeps the alpha channel that allows transparency)
     fragment_img = cv.imread(cv.samples.findFile(framgments_folder_path + fragment["image_name"]), cv.IMREAD_UNCHANGED)
     # image format 
     # [[[0, 0, 0, 0], ... ], ...]
-    # [R, G, B, Alpha]
+    # [B, G, R, Alpha]
 
     # Get fragment size (matrix length)
     cols_f, rows_f, _ = fragment_img.shape
@@ -52,12 +119,9 @@ for fragment in fragments_coordinates[:2]:
     # Apply the rotation matrix on the fragment
     rotated_fragment = cv.warpAffine(fragment_img, M_rotation, (cols_f, rows_f))
 
-    # TODO : Change the image dimension from the image coordinates
-    # XXX: By guessing that the coordinates are on the botom left of the image
-    # TODO : Add the fragment to the main image  
-      
+    # Add the fragment to the main image  
+    add_fragment_to_goal_image(fragment, rotated_fragment, background)
+    cv.imshow("Goal image with a new fragment", background)
+    cv.imshow("frag " + fragment["image_name"]  , rotated_fragment)
 
-    # cv.imshow("fragment", fragment_img)
-    # cv.imshow("rotated fragment", rotated_fragment)
-
-    k = cv.waitKey(0)
+k = cv.waitKey(0)
