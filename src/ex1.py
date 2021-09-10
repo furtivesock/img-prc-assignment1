@@ -24,9 +24,9 @@ def load_fragments() -> list:
             # Info = [2, 575, 640, -54.0116]
             if len(info) == 4:
                 fragments_coordinates.append({
-                    "num": int(info[0]),
-                    "x": int(info[1]),
-                    "y": int(info[2]),
+                    "num":      int(info[0]),
+                    "x":        int(info[1]),
+                    "y":        int(info[2]),
                     "rotation": float(info[3]),
                     "image_name": "frag_eroded_" + str(info[0]) + ".png"
                 })
@@ -35,14 +35,12 @@ def load_fragments() -> list:
 
 
 def add_fragment_to_goal_image(fragment_info, fragment_img, goal_image) -> None:
-    # XXX: By guessing that the coordinates are on the botom left of the image
-
     fragment_coord_y = 0
     fragment_coord_x = 0
 
     # Iterate each one of the fragment pixels
     for row in fragment_img:
-        # Find the y coodinate of the pixel on the goal image
+        # Calculate the y coodinate of the fragment pixel on the goal image
         goal_image_fragment_y = fragment_info["y"] - \
             int(fragment_img.shape[0] / 2) + fragment_coord_y
         # Check that we are the fragment image isn't going to be out of the image
@@ -53,7 +51,7 @@ def add_fragment_to_goal_image(fragment_info, fragment_img, goal_image) -> None:
             # Because goal image is in jpg (R, G, B) and fragment_image  if alpha > 0 : add pixel to goal_image
             if pixel[3] > 200:
                 # The alpha is > 0 : the pixel isn't tranparent
-                # Find the x coodinate of the pixel on the goal image
+                # Calculate the x coodinate of the fragment pixel on the goal image
                 goal_image_fragment_x = fragment_info["x"] - int(
                     fragment_img.shape[1] / 2) + fragment_coord_x
                 # Check that we are the fragment image isn't going to be out of the image
@@ -76,8 +74,7 @@ fragments_coordinates = load_fragments()
 # Load the original image
 # XXX: Maybe problem with the used flag (see alpha channel)
 original_img = cv.imread("../" + ORIGINAL_FILENAME, cv.IMREAD_UNCHANGED)
-# [[[0, 0, 0], ... ], ...]
-# [B, G, R]
+# [[[B, G, R], ... ], ...]
 
 # Set a light background with the original image
 # The clear background will help us understand how the fragments match
@@ -95,11 +92,11 @@ k = cv.waitKey(0)
 
 for fragment in fragments_coordinates:
     # Load fragment (keeps the alpha channel that allows transparency)
+    # TODO : check that the fragment exist
     fragment_img = cv.imread(cv.samples.findFile(
         framgments_folder_path + fragment["image_name"]), cv.IMREAD_UNCHANGED)
     # image format
-    # [[[0, 0, 0, 0], ... ], ...]
-    # [B, G, R, Alpha]
+    # [[[B, G, R, Alpha], ... ], ...]
 
     # Get fragment size (matrix length)
     cols_f, rows_f, _ = fragment_img.shape
@@ -107,6 +104,7 @@ for fragment in fragments_coordinates:
           " y : " + str(fragment["y"]) + " h : " + str(cols_f) + " w : " + str(rows_f))
 
     # Rotate the image
+    # TODO : set rotations as a function
     # XXX: For now we supposed that the pivot point is the center
     # Create a rotation matrix based on the fragment rotation
     center_f = ((cols_f - 1) / 2.0, (rows_f - 1) / 2.0)
