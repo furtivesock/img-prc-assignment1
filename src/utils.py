@@ -21,7 +21,7 @@ def load_fragments() -> list:
     return fragments_coordinates
 
 
-def load_wrong_fragments_numbers() -> list(int):
+def load_wrong_fragments_numbers() -> list:
     # Load the wrong fragments numbers
     wrong_fragments_numbers = []
     with open('../fragments_s.txt') as f:
