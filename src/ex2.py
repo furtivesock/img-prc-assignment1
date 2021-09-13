@@ -20,9 +20,9 @@ class Margin:
     """Fragment margin of error set by user
 
     Attributes:
-        dx          Horizontal positioning margin
-        dy          Vertical positioning margin
-        dalpha      Orientation margin
+        dx          Horizontal positioning margin (in pixels)
+        dy          Vertical positioning margin (in pixels)
+        dalpha      Orientation margin (in degrees)
     """
     def __init__(self, dx, dy, dalpha):
         self.dx = dx
