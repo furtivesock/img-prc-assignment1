@@ -1,6 +1,7 @@
 import cv2 as cv
 import math
 import numpy as np
+from utils import load_fragments
 
 framgments_folder_path = "../frag_eroded/"
 ORIGINAL_FILENAME = "Michelangelo_ThecreationofAdam_1707x775.jpg"
@@ -11,27 +12,6 @@ ORIGINAL_FILENAME = "Michelangelo_ThecreationofAdam_1707x775.jpg"
 
 GOAL_IMAGE_WIDTH = 1707
 GOAL_IMAGE_HEIGHT = 775
-
-
-def load_fragments() -> list:
-    # Load the fragments informations
-    fragments_coordinates = []
-    with open('../fragments.txt') as f:
-        lines = f.read().split('\n')
-
-        for line in lines:
-            info = line.split(' ')
-            # Info = [2, 575, 640, -54.0116]
-            if len(info) == 4:
-                fragments_coordinates.append({
-                    "num":      int(info[0]),
-                    "x":        int(info[1]),
-                    "y":        int(info[2]),
-                    "rotation": float(info[3]),
-                    "image_name": "frag_eroded_" + str(info[0]) + ".png"
-                })
-
-    return fragments_coordinates
 
 
 def add_fragment_to_goal_image(fragment_info, fragment_img, goal_image) -> None:
