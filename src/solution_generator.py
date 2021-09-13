@@ -20,7 +20,8 @@ from utils import load_fragments, load_wrong_fragments_numbers
 
 # 4. Other
 #      - Empty solution
-#      - Correct solution
+#      - 100% Correct solution
+#      - Solution with only wrong fragments
 
 # ======= Variables ======
 SOLUTION_FOLDER_PATH = "../solutions/"
@@ -60,23 +61,33 @@ def generate_close_to_target_solution(target):
     return solution
 
 
-def generate_not_so_close_to_target_solution(target, wrong_fragments_numbers, number_of_wrong_fragments):
+def generate_not_so_close_to_target_solution(target, wrong_fragments_numbers):
     # Add a litle random variation to the target coordinates
     solution = generate_close_to_target_solution(target)
 
     # Remove a random amount of random fragments
-    NB_FRAGMENTS_TO_REMOVE_MAX = 10
-    NB_FRAGMENTS_TO_REMOVE = random.randint(0, NB_FRAGMENTS_TO_REMOVE_MAX)
+    NB_FRAGMENTS_TO_REMOVE_MIN = 1
+    NB_FRAGMENTS_TO_REMOVE_MAX = 4
+    NB_FRAGMENTS_TO_REMOVE = random.randint(
+        NB_FRAGMENTS_TO_REMOVE_MIN, NB_FRAGMENTS_TO_REMOVE_MAX)
     for i in range(0, NB_FRAGMENTS_TO_REMOVE):
         solution.pop(random.randint(0, len(solution) - 1))
 
-    # Replace number_of_wrong_fragments fragments with a random fragment that does not belong to the original image
-    for i in range(number_of_wrong_fragments):
+    # Replace fragments with a random fragment that does not belong to the original image
+    NUMBER_OF_WRONG_FRAGMENTS_MIN = 1
+    NUMBER_OF_WRONG_FRAGMENTS_MAX = 4
+    NUMBER_OF_WRONG_FRAGMENTS = random.randint(
+        NUMBER_OF_WRONG_FRAGMENTS_MIN, NUMBER_OF_WRONG_FRAGMENTS_MAX)
+
+    for i in range(NUMBER_OF_WRONG_FRAGMENTS):
         wrong_fragment_number = random.choice(wrong_fragments_numbers)
         good_fragment_id = random.randint(0, len(solution) - 1)
         solution[good_fragment_id]["num"] = wrong_fragment_number
 
     return solution
+
+# TODO : Random solution
+# TODO : Other solution
 
 
 # ========= Main =========
@@ -98,7 +109,7 @@ for i in range(NB_CLOSE_SOLUTIONS):
 wrong_fragments_numbers = load_wrong_fragments_numbers()
 for i in range(NB_NOT_SO_CLOSE_SOLUTIONS):
     solution = generate_not_so_close_to_target_solution(
-        target_fragments, wrong_fragments_numbers, i + 1)
+        target_fragments, wrong_fragments_numbers)
     solution_file_name = "solution_not_so_close_to_target_" + \
         str(i + 1) + ".txt"
     save_solution(solution, solution_file_name)
