@@ -54,16 +54,36 @@ if __name__ == '__main__':
         margin = Margin(sys.argv[1], sys.argv[2], sys.argv[3])
 
     # TODO: Read suggested solution.txt file, store the fragments data in list
+    solution_fragments = []
+    # ...
+
     # TODO: Read real solution fragments.txt file, store the correct fragments data in list
+    correct_fragments = []
+    # ...
 
     # TODO: Filtering: For each solution fragment, find if real solution includes this fragment
+    well_located_fragments = []
+    uncorrect_fragments = []
     # If true, call Fragment comparison function
     #   If it returns true, store it in well located fragments list
-    # If false, store it in not belonging list
+    # If false, store it in uncorrect list
 
-    # TODO: Compute surface of well located fragments
-    # TODO: Compute surface of not belonging fragments
-    # TODO: Compute surface of all fragments of fragments.txt
-    # TODO: Compute precision p with the computed surfaces
+    # Compute solution precision
+    well_located_surface = 0
+    for fragment in solution_fragments:
+        well_located_surface += surface(fragment)
+
+    uncorrect_surface = 0
+    for fragment in uncorrect_fragments:
+        uncorrect_surface += surface(fragment)
+
+    correct_surface = 0
+    for fragment in correct_fragments:
+        correct_surface += surface(fragment)
+
+    p = (well_located_surface - uncorrect_surface)/correct_surface
+
+    print(f"Using the following margins delta_x={margin.dx}, delta_y={margin.dy} and delta_alpha={margin.dalpha},"
+        + f"the solution has a precision p of {p}")
 
     # TODO (enhancement): Show exceeded pixels in red on the fresco
