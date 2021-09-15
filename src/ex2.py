@@ -10,6 +10,7 @@ Authors: Sophie Nguyen <sophie.nguyen@universite-paris-saclay.fr>, Tom Mansion <
 """
 
 import sys
+import numpy as np
 
 # Default margins to make the coding easier
 DX = 3
@@ -31,6 +32,16 @@ class Margin:
 
 # TODO: Fragment comparison function: returns true if the difference in x, y and orientation alpha is lower than the set parameters, returns false is not
 # TODO: Compute fragment surface function
+def surface(img):
+    """Count the number of strictly non-transparent pixels (alpha channel = 255)
+
+    Args:
+        img (array): Image to count
+
+    Returns:
+        int: Number of non-transparent pixels
+    """
+    return np.count_nonzero(img[:, :, 3] == 255)
 
 # TODO: MAIN FUNCTION 
 
@@ -42,18 +53,17 @@ if __name__ == '__main__':
     else:
         margin = Margin(sys.argv[1], sys.argv[2], sys.argv[3])
 
+    # TODO: Read suggested solution.txt file, store the fragments data in list
+    # TODO: Read real solution fragments.txt file, store the correct fragments data in list
 
-# TODO: Read suggested solution.txt file, store the fragments data in list
-# TODO: Read real solution fragments.txt file, store the solution fragments data in list
+    # TODO: Filtering: For each solution fragment, find if real solution includes this fragment
+    # If true, call Fragment comparison function
+    #   If it returns true, store it in well located fragments list
+    # If false, store it in not belonging list
 
-# TODO: Filtering: For each solution fragment, find if real solution includes this fragment
-# If true, call Fragment comparison function
-#   If it returns true, store it in well located fragments list
-# If false, store it in not belonging list
+    # TODO: Compute surface of well located fragments
+    # TODO: Compute surface of not belonging fragments
+    # TODO: Compute surface of all fragments of fragments.txt
+    # TODO: Compute precision p with the computed surfaces
 
-# TODO: Compute surface of well located fragments
-# TODO: Compute surface of not belonging fragments
-# TODO: Compute surface of all fragments of fragments.txt
-# TODO: Compute precision p with the computed surfaces
-
-# TODO (enhancement): Show exceeded pixels in red on the fresco
+    # TODO (enhancement): Show exceeded pixels in red on the fresco
