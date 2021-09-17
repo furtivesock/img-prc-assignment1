@@ -15,8 +15,8 @@ Authors: Sophie Nguyen <sophie.nguyen@universite-paris-saclay.fr>, Tom Mansion <
 """
 
 # Default margins to make the coding easier
-DX = 100000
-DY = 100000
+DX = 0
+DY = 0
 DALPHA = 5
 FRAGMENTS_FOLDER_PATH = "../frag_eroded/"
 
@@ -39,7 +39,7 @@ class Margin:
 # TODO: Compute fragment surface function
 
 
-def surface(img):
+def surface(img) -> int:
     """Count the number of strictly non-transparent pixels (alpha channel = 255)
 
     Args:
@@ -49,6 +49,39 @@ def surface(img):
         int: Number of non-transparent pixels
     """
     return np.count_nonzero(img[:, :, 3] == 255)
+
+
+def is_fragment_correct(fragment, correct_fragments, incorrect_fragments_numbers) -> bool:
+    """Tels if a fragment is correct or not
+    if the fragment numer is in the incorrect_fragments_numbers list, it is considered as incorrect
+    else if the fragment is in the correct_fragments list and the coordinates differences are less than DX and DY,
+    it is considered as correct
+
+    Args:
+        fragment (dict): fragment to check
+        correct_fragments (list): list of correct fragments
+        incorrect_fragments_numbers (list): list of incorrect fragments numbers
+
+    Returns:
+        bool: True if the fragment is correct, False otherwise
+    """
+
+    if fragment["num"] in incorrect_fragments_numbers:
+        return False
+
+    # Get the coordinates of the correct fragment
+    correct_fragment = next(
+        (correct_fragment for correct_fragment in correct_fragments if correct_fragment["num"] == fragment["num"]), None)
+    if abs(fragment["x"] - correct_fragment["x"]) > DX:
+        return False
+
+    if abs(fragment["y"] - correct_fragment["y"]) > DY:
+        return False
+
+    if abs(fragment["rotation"] - correct_fragment["rotation"]) > DALPHA:
+        return False
+
+    return True
 
 
 if __name__ == '__main__':
@@ -91,10 +124,10 @@ if __name__ == '__main__':
         incorrect_fragments = []
 
         for fragment in solution["fragments"]:
-            if fragment["num"] in incorrect_fragment_numbers:
-                incorrect_fragments.append(fragment)
-            else:
+            if is_fragment_correct(fragment, correct_fragments, incorrect_fragment_numbers):
                 well_located_fragments.append(fragment)
+            else:
+                incorrect_fragments.append(fragment)
 
         # Compute solution precision
         well_located_surface = 0
