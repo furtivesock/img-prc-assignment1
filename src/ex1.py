@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+import cv2 as cv
+import numpy as np
+from utils import load_fragments
+
 """Exercise 1
 
 Replace fragments on the fresco 'The creation of Adam' by Michelangelo using a ready-made solution
@@ -6,48 +10,12 @@ Replace fragments on the fresco 'The creation of Adam' by Michelangelo using a r
 Authors: Tom Mansion <tom.mansion@universite-paris-saclay.fr>, Sophie Nguyen <sophie.nguyen@universite-paris-saclay.fr>
 """
 
-import cv2 as cv
-import numpy as np
-
 FRAGMENTS_FOLDER_PATH = "../frag_eroded/"
 ORIGINAL_FILENAME = "Michelangelo_ThecreationofAdam_1707x775.jpg"
 ORIGINAL_IMAGE_OPACITY = 0.3
 
-def load_fragments() -> list:
-    """Load the correct fragments informations (name, coordinates, rotation)
-    Raw data format: [fragment number, x, y, rotation]
-
-    Returns:
-        list: List containing informations about the fragments
-    """
-    # Load the fragments informations
-    fragments_data = []
-    with open('../fragments.txt') as f:
-        lines = f.read().split('\n')
-
-        for line in lines:
-            info = line.split(' ')
-            if len(info) == 4:
-                fragments_data.append({
-                    "num":      int(info[0]),
-                    "x":        int(info[1]),
-                    "y":        int(info[2]),
-                    "rotation": float(info[3]),
-                    "image_name": "frag_eroded_" + str(info[0]) + ".png"
-                })
-
-    return fragments_data
 
 def add_fragment_to_target_image(fragment_info, fragment_img, target_image, target_width, target_height) -> None:
-    """Put the fragment on the original fresco according to its coordinates
-
-    Args:
-        fragment_info (dictionary): Fragment information
-        fragment_img (array): Fragment image
-        target_image (array): Original fresco where the fragment is put
-        target_width (int): Computed fresco width
-        target_height (int): Computed fresco height
-    """
     fragment_coord_y = 0
     fragment_coord_x = 0
 
@@ -80,6 +48,7 @@ def add_fragment_to_target_image(fragment_info, fragment_img, target_image, targ
         fragment_coord_y += 1
         fragment_coord_x = 0
 
+
 if __name__ == '__main__':
     # Load the fragments informations
     fragments_data = load_fragments()
@@ -91,9 +60,11 @@ if __name__ == '__main__':
     # Set a light background with the original image
     # It will help us understand how the fragments match
     # Add a low alpha channel to the original_img
-    white_background = np.full((target_height, target_width, 3), 255, dtype=np.uint8)
-    background = cv.addWeighted(original_img, ORIGINAL_IMAGE_OPACITY, white_background, 1 - ORIGINAL_IMAGE_OPACITY, 0)
-    
+    white_background = np.full(
+        (target_height, target_width, 3), 255, dtype=np.uint8)
+    background = cv.addWeighted(
+        original_img, ORIGINAL_IMAGE_OPACITY, white_background, 1 - ORIGINAL_IMAGE_OPACITY, 0)
+
     for fragment in fragments_data:
         # Load fragment (keeps the alpha channel that allows transparency)
         fragment_img = cv.imread(cv.samples.findFile(
@@ -101,7 +72,8 @@ if __name__ == '__main__':
 
         # Get fragment size (matrix length)
         cols_f, rows_f, _ = fragment_img.shape
-        print(f"name: {fragment['image_name']}, x: {fragment['x']}, y: {fragment['y']}, h: {cols_f}, w: {rows_f}")
+        print(
+            f"name: {fragment['image_name']}, x: {fragment['x']}, y: {fragment['y']}, h: {cols_f}, w: {rows_f}")
 
         # Rotate the image
         center_f = ((cols_f - 1) / 2.0, (rows_f - 1) / 2.0)
@@ -112,7 +84,8 @@ if __name__ == '__main__':
             fragment_img, M_rotation, (cols_f, rows_f))
 
         # Add the fragment to the main image
-        add_fragment_to_target_image(fragment, rotated_fragment, background, target_width, target_height)
+        add_fragment_to_target_image(
+            fragment, rotated_fragment, background, target_width, target_height)
 
     cv.imshow("Target image with a new fragment", background)
 
