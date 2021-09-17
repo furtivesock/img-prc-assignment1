@@ -17,6 +17,7 @@ DX = 3
 DY = 3
 DALPHA = 5
 
+
 class Margin:
     """Fragment margin of error set by user
 
@@ -25,6 +26,7 @@ class Margin:
         dy          Vertical positioning margin (in pixels)
         dalpha      Orientation margin (in degrees)
     """
+
     def __init__(self, dx, dy, dalpha):
         self.dx = dx
         self.dy = dy
@@ -32,6 +34,8 @@ class Margin:
 
 # TODO: Fragment comparison function: returns true if the difference in x, y and orientation alpha is lower than the set parameters, returns false is not
 # TODO: Compute fragment surface function
+
+
 def surface(img):
     """Count the number of strictly non-transparent pixels (alpha channel = 255)
 
@@ -43,7 +47,8 @@ def surface(img):
     """
     return np.count_nonzero(img[:, :, 3] == 255)
 
-# TODO: MAIN FUNCTION 
+# TODO: MAIN FUNCTION
+
 
 if __name__ == '__main__':
     margin = None
@@ -81,9 +86,9 @@ if __name__ == '__main__':
     for fragment in correct_fragments:
         correct_surface += surface(fragment)
 
-    p = (well_located_surface - uncorrect_surface)/correct_surface
+    p = (well_located_surface - uncorrect_surface) / correct_surface
 
     print(f"Using the following margins delta_x={margin.dx}, delta_y={margin.dy} and delta_alpha={margin.dalpha},"
-        + f"the solution has a precision p of {p}")
+          + f"the solution has a precision p of {p}")
 
     # TODO (enhancement): Show exceeded pixels in red on the fresco
