@@ -1,4 +1,9 @@
 #!/usr/bin/python3
+import sys
+import cv2 as cv
+import numpy as np
+from utils import load_fragments, get_all_wrong_images_paths, load_solutions, load_wrong_fragments_numbers
+
 """Exercise 2
 
 Assess precision of a suggested solution of fragments coordinates and orientation based on the real solution
@@ -9,13 +14,11 @@ Run by providing the following parameters:
 Authors: Sophie Nguyen <sophie.nguyen@universite-paris-saclay.fr>, Tom Mansion <tom.mansion@universite-paris-saclay.fr>
 """
 
-import sys
-import numpy as np
-
 # Default margins to make the coding easier
-DX = 3
-DY = 3
+DX = 100000
+DY = 100000
 DALPHA = 5
+FRAGMENTS_FOLDER_PATH = "../frag_eroded/"
 
 
 class Margin:
@@ -47,8 +50,6 @@ def surface(img):
     """
     return np.count_nonzero(img[:, :, 3] == 255)
 
-# TODO: MAIN FUNCTION
-
 
 if __name__ == '__main__':
     margin = None
@@ -58,37 +59,55 @@ if __name__ == '__main__':
     else:
         margin = Margin(sys.argv[1], sys.argv[2], sys.argv[3])
 
-    # TODO: Read suggested solution.txt file, store the fragments data in list
-    solution_fragments = []
-    # ...
-
-    # TODO: Read real solution fragments.txt file, store the correct fragments data in list
-    correct_fragments = []
-    # ...
-
-    # TODO: Filtering: For each solution fragment, find if real solution includes this fragment
-    well_located_fragments = []
-    uncorrect_fragments = []
-    # If true, call Fragment comparison function
-    #   If it returns true, store it in well located fragments list
-    # If false, store it in uncorrect list
-
-    # Compute solution precision
-    well_located_surface = 0
-    for fragment in solution_fragments:
-        well_located_surface += surface(fragment)
-
-    uncorrect_surface = 0
-    for fragment in uncorrect_fragments:
-        uncorrect_surface += surface(fragment)
+    # Load the correct fragments and calculate the good surfaces
+    correct_fragments = load_fragments("../fragments.txt")
+    print("Loading fragment images")
 
     correct_surface = 0
+    surfaces = {}
     for fragment in correct_fragments:
-        correct_surface += surface(fragment)
+        fragment_image = cv.imread(
+            FRAGMENTS_FOLDER_PATH + fragment["image_name"], cv.IMREAD_UNCHANGED)
+        image_surface = surface(fragment_image)
+        surfaces[fragment["image_name"]] = image_surface
+        correct_surface += image_surface
 
-    p = (well_located_surface - uncorrect_surface) / correct_surface
+    # Also load the wrong fragments image surfaces
+    for wrong_fragment_path in get_all_wrong_images_paths():
+        fragment_image = cv.imread(
+            FRAGMENTS_FOLDER_PATH + wrong_fragment_path, cv.IMREAD_UNCHANGED)
+        surfaces[wrong_fragment_path] = surface(fragment_image)
 
-    print(f"Using the following margins delta_x={margin.dx}, delta_y={margin.dy} and delta_alpha={margin.dalpha},"
-          + f"the solution has a precision p of {p}")
+    # Load the suggested solution files
+    solutions = load_solutions()
+
+    # Load the incorrect fragment numbers
+    incorrect_fragment_numbers = load_wrong_fragments_numbers()
+
+    # Process all solutions
+    for solution in solutions:
+        # Seperate good solution fragments from invalid ones
+        well_located_fragments = []
+        incorrect_fragments = []
+
+        for fragment in solution["fragments"]:
+            if fragment["num"] in incorrect_fragment_numbers:
+                incorrect_fragments.append(fragment)
+            else:
+                well_located_fragments.append(fragment)
+
+        # Compute solution precision
+        well_located_surface = 0
+        for fragment in well_located_fragments:
+            well_located_surface += surfaces[fragment["image_name"]]
+
+        uncorrect_surface = 0
+        for fragment in incorrect_fragments:
+            uncorrect_surface += surfaces[fragment["image_name"]]
+
+        p = (well_located_surface - uncorrect_surface) / correct_surface
+
+        print(f"{solution['name']} : Using the following margins delta_x={margin.dx}, delta_y={margin.dy} and delta_alpha={margin.dalpha},"
+              + f"the solution has a precision p of {p}")
 
     # TODO (enhancement): Show exceeded pixels in red on the fresco

@@ -51,7 +51,7 @@ def add_fragment_to_target_image(fragment_info, fragment_img, target_image, targ
 
 if __name__ == '__main__':
     # Load the fragments informations
-    fragments_data = load_fragments()
+    fragments_data = load_fragments("../fragments.txt")
 
     # Load the original image
     original_img = cv.imread("../" + ORIGINAL_FILENAME, cv.IMREAD_UNCHANGED)
