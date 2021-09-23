@@ -15,6 +15,17 @@ ORIGINAL_FILENAME = "Michelangelo_ThecreationofAdam_1707x775.jpg"
 ORIGINAL_IMAGE_OPACITY = 0.3
 
 
+def rotate_fragment(fragment_img, angle, cols_f, rows_f):
+    # Calculate the coordinates of the center of the fragment
+    certer_coordinates = ((cols_f - 1) / 2.0, (rows_f - 1) / 2.0)
+    # Create a rotation matrix
+    M_rotation = cv.getRotationMatrix2D(certer_coordinates, angle, 1)
+    # Apply the rotation matrix on the fragment
+    rotated_fragment = cv.warpAffine(
+        fragment_img, M_rotation, (cols_f, rows_f))
+    return rotated_fragment
+
+
 def add_fragment_to_target_image(fragment_info, fragment_img, target_image, target_width, target_height) -> None:
     fragment_coord_y = 0
     fragment_coord_x = 0
@@ -73,20 +84,16 @@ if __name__ == '__main__':
         # Get fragment size (matrix length)
         cols_f, rows_f, _ = fragment_img.shape
         print(
-            f"name: {fragment['image_name']}, x: {fragment['x']}, y: {fragment['y']}, h: {cols_f}, w: {rows_f}")
+            f"name: {fragment['image_name']}, x: {fragment['x']}, y: {fragment['y']}, h: {cols_f}, w: {cols_f}")
 
         # Rotate the image
-        center_f = ((cols_f - 1) / 2.0, (rows_f - 1) / 2.0)
-        M_rotation = cv.getRotationMatrix2D(
-            ((cols_f - 1) / 2.0, (rows_f - 1) / 2.0), fragment["rotation"], 1)
-        # Apply the rotation matrix on the fragment
-        rotated_fragment = cv.warpAffine(
-            fragment_img, M_rotation, (cols_f, rows_f))
+        rotated_fragment = rotate_fragment(
+            fragment_img, fragment["rotation"], cols_f, cols_f)
 
         # Add the fragment to the main image
         add_fragment_to_target_image(
             fragment, rotated_fragment, background, target_width, target_height)
 
+    # Show the result
     cv.imshow("Target image with a new fragment", background)
-
     k = cv.waitKey(0)
