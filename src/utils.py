@@ -58,7 +58,7 @@ def get_all_wrong_images_paths() -> list:
 def load_solutions() -> list:
     # Load the solutions
     solutions = []
-    for solution_name in os.listdir(SOLUTIONS_PATH):
+    for solution_name in sorted(os.listdir(SOLUTIONS_PATH)):
         solutions.append({
             "name": solution_name.split('.')[0],
             "fragments": load_fragments(SOLUTIONS_PATH + solution_name)

@@ -2,12 +2,13 @@
 import sys
 import cv2 as cv
 import numpy as np
+import math
 from utils import load_fragments, get_all_wrong_images_paths, load_solutions, load_wrong_fragments_numbers
 
 """Exercise 2
 
 Assess precision of a suggested solution of fragments coordinates and orientation based on the real solution
-Run by providing the following parameters:
+Run by providing the optional following parameters:
 
 ./ex2.py [Dx (px)] [Dy (px)] [Dalpha (deg)]
 
@@ -15,9 +16,9 @@ Authors: Sophie Nguyen <sophie.nguyen@universite-paris-saclay.fr>, Tom Mansion <
 """
 
 # Default margins to make the coding easier
-DX = 0
-DY = 0
-DALPHA = 5
+DX = 4
+DY = 4
+DALPHA = 4
 FRAGMENTS_FOLDER_PATH = "../frag_eroded/"
 
 
@@ -35,9 +36,6 @@ class Margin:
         self.dy = dy
         self.dalpha = dalpha
 
-# TODO: Fragment comparison function: returns true if the difference in x, y and orientation alpha is lower than the set parameters, returns false is not
-# TODO: Compute fragment surface function
-
 
 def surface(img) -> int:
     """Count the number of strictly non-transparent pixels (alpha channel = 255)
@@ -51,34 +49,46 @@ def surface(img) -> int:
     return np.count_nonzero(img[:, :, 3] == 255)
 
 
-def is_fragment_correct(fragment, correct_fragments, incorrect_fragments_numbers) -> bool:
+def is_fragment_wrong(fragment, incorrect_fragments_numbers) -> bool:
+    """Tels if a fragment is wrong or not
+    if the fragment numer is in the incorrect_fragments_numbers list, it is considered as wrong
+
+    Args:
+        fragment (dict): fragment to check
+        incorrect_fragments_numbers (list): list of incorrect fragments numbers
+
+    Returns:
+        bool: True if the fragment is wrong, False otherwise
+    """
+
+    if fragment["num"] in incorrect_fragments_numbers:
+        return True
+
+    return False
+
+
+def is_fragment_correct(fragment, correct_fragments, margin) -> bool:
     """Tels if a fragment is correct or not
-    if the fragment numer is in the incorrect_fragments_numbers list, it is considered as incorrect
-    else if the fragment is in the correct_fragments list and the coordinates differences are less than DX and DY,
-    it is considered as correct
+    if the fragment coordinates differences are less than DX and DY, it is considered as correct
 
     Args:
         fragment (dict): fragment to check
         correct_fragments (list): list of correct fragments
-        incorrect_fragments_numbers (list): list of incorrect fragments numbers
 
     Returns:
         bool: True if the fragment is correct, False otherwise
     """
-
-    if fragment["num"] in incorrect_fragments_numbers:
-        return False
-
     # Get the coordinates of the correct fragment
     correct_fragment = next(
         (correct_fragment for correct_fragment in correct_fragments if correct_fragment["num"] == fragment["num"]), None)
-    if abs(fragment["x"] - correct_fragment["x"]) > DX:
+
+    if abs(fragment["x"] - correct_fragment["x"]) > margin.dx:
         return False
 
-    if abs(fragment["y"] - correct_fragment["y"]) > DY:
+    if abs(fragment["y"] - correct_fragment["y"]) > margin.dy:
         return False
 
-    if abs(fragment["rotation"] - correct_fragment["rotation"]) > DALPHA:
+    if abs(fragment["rotation"] - correct_fragment["rotation"]) > margin.dalpha:
         return False
 
     return True
@@ -90,9 +100,9 @@ if __name__ == '__main__':
     if len(sys.argv) != 4:
         margin = Margin(DX, DY, DALPHA)
     else:
-        margin = Margin(sys.argv[1], sys.argv[2], sys.argv[3])
+        margin = Margin(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
 
-    # Load the correct fragments and calculate the good surfaces
+    # Load the correct fragments and calculate the images surfaces
     correct_fragments = load_fragments("../fragments.txt")
     print("Loading fragment images")
 
@@ -117,30 +127,28 @@ if __name__ == '__main__':
     # Load the incorrect fragment numbers
     incorrect_fragment_numbers = load_wrong_fragments_numbers()
 
+    print(
+        f"Using the following margins delta_x={margin.dx}, delta_y={margin.dy} and delta_alpha={margin.dalpha}")
     # Process all solutions
     for solution in solutions:
         # Seperate good solution fragments from invalid ones
-        well_located_fragments = []
-        incorrect_fragments = []
-
-        for fragment in solution["fragments"]:
-            if is_fragment_correct(fragment, correct_fragments, incorrect_fragment_numbers):
-                well_located_fragments.append(fragment)
-            else:
-                incorrect_fragments.append(fragment)
-
         # Compute solution precision
+        wrong_fragment_surface = 0
+        wrong_fragments = 0
         well_located_surface = 0
-        for fragment in well_located_fragments:
-            well_located_surface += surfaces[fragment["image_name"]]
+        incorrect_fragments = 0
+        for fragment in solution["fragments"]:
+            if is_fragment_wrong(fragment, incorrect_fragment_numbers):
+                wrong_fragment_surface += surfaces[fragment["image_name"]]
+                wrong_fragments += 1
+            elif is_fragment_correct(fragment, correct_fragments, margin):
+                well_located_surface += surfaces[fragment["image_name"]]
+            else:
+                incorrect_fragments += 1
 
-        uncorrect_surface = 0
-        for fragment in incorrect_fragments:
-            uncorrect_surface += surfaces[fragment["image_name"]]
+        p = max(0, math.ceil(100 * (well_located_surface -
+                                    wrong_fragment_surface) / correct_surface))
 
-        p = (well_located_surface - uncorrect_surface) / correct_surface
-
-        print(f"{solution['name']} : Using the following margins delta_x={margin.dx}, delta_y={margin.dy} and delta_alpha={margin.dalpha},"
-              + f"the solution has a precision p of {p}")
+        print(f"{solution['name']}, with {wrong_fragments} wrong, {incorrect_fragments} incorrect, and {len(solution['fragments']) - wrong_fragments - incorrect_fragments}/{len(correct_fragments)} good fragments has a surface precision of {p}%")
 
     # TODO (enhancement): Show exceeded pixels in red on the fresco

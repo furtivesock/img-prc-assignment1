@@ -15,10 +15,7 @@ from utils import load_fragments, load_wrong_fragments_numbers
 # 2. Not so close to the target
 #      Close to the target but with additional or missing fragments
 
-# 3. Random
-#      Random selection of fragments and random coordinates
-
-# 4. Other
+#  Other
 #      - Empty solution
 #      - 100% Correct solution
 #      - Solution with only wrong fragments
@@ -26,9 +23,8 @@ from utils import load_fragments, load_wrong_fragments_numbers
 # ======= Variables ======
 SOLUTION_FOLDER_PATH = "../solutions/"
 
-NB_CLOSE_SOLUTIONS = 3
-NB_NOT_SO_CLOSE_SOLUTIONS = 3
-NB_RANDOM_SOLUTIONS = 3
+NB_CLOSE_SOLUTIONS = 4
+NB_NOT_SO_CLOSE_SOLUTIONS = 4
 
 
 def save_solution(solution, solution_name):
@@ -44,21 +40,21 @@ def save_solution(solution, solution_name):
 
 def generate_close_to_target_solution(target):
     # Add a litle random variation to the target coordinates
-    PIXEL_RANDOM_VARIATION = 10
+    PIXEL_RANDOM_VARIATION = 5
     ROTATION_RANDOM_VARIATION = 5
+    CHANCE_OF_CHANGING = 1 / 5
 
-    solution = []
-    for fragment in target:
-        x = fragment["x"] + \
-            random.randint(-PIXEL_RANDOM_VARIATION, PIXEL_RANDOM_VARIATION)
-        y = fragment["y"] + \
-            random.randint(-PIXEL_RANDOM_VARIATION, PIXEL_RANDOM_VARIATION)
-        rotation = fragment["rotation"] + \
-            random.randint(-ROTATION_RANDOM_VARIATION,
-                           ROTATION_RANDOM_VARIATION)
-        solution.append({"num": fragment["num"], "x": x, "y": y,
-                         "rotation": rotation, "image_name": fragment["image_name"]})
-    return solution
+    target_copy = target.copy()
+    for fragment in target_copy:
+        if random.random() < CHANCE_OF_CHANGING:
+            fragment['x'] += random.randint(-PIXEL_RANDOM_VARIATION,
+                                            PIXEL_RANDOM_VARIATION)
+            fragment['y'] += random.randint(-PIXEL_RANDOM_VARIATION,
+                                            PIXEL_RANDOM_VARIATION)
+            fragment['rotation'] += random.randint(-ROTATION_RANDOM_VARIATION,
+                                                   ROTATION_RANDOM_VARIATION)
+
+    return target_copy
 
 
 def generate_not_so_close_to_target_solution(target, wrong_fragments_numbers):
@@ -66,18 +62,13 @@ def generate_not_so_close_to_target_solution(target, wrong_fragments_numbers):
     solution = generate_close_to_target_solution(target)
 
     # Remove a random amount of random fragments
-    NB_FRAGMENTS_TO_REMOVE_MIN = 1
-    NB_FRAGMENTS_TO_REMOVE_MAX = 4
-    NB_FRAGMENTS_TO_REMOVE = random.randint(
-        NB_FRAGMENTS_TO_REMOVE_MIN, NB_FRAGMENTS_TO_REMOVE_MAX)
-    for i in range(0, NB_FRAGMENTS_TO_REMOVE):
-        solution.pop(random.randint(0, len(solution) - 1))
+    NB_FRAGMENTS_TO_REMOVE = random.randint(1, 100)
+
+    random.shuffle(solution)
+    solution = solution[:-NB_FRAGMENTS_TO_REMOVE]
 
     # Replace fragments with a random fragment that does not belong to the original image
-    NUMBER_OF_WRONG_FRAGMENTS_MIN = 1
-    NUMBER_OF_WRONG_FRAGMENTS_MAX = 4
-    NUMBER_OF_WRONG_FRAGMENTS = random.randint(
-        NUMBER_OF_WRONG_FRAGMENTS_MIN, NUMBER_OF_WRONG_FRAGMENTS_MAX)
+    NUMBER_OF_WRONG_FRAGMENTS = random.randint(1, 20)
 
     for i in range(NUMBER_OF_WRONG_FRAGMENTS):
         wrong_fragment_number = random.choice(wrong_fragments_numbers)
@@ -86,20 +77,32 @@ def generate_not_so_close_to_target_solution(target, wrong_fragments_numbers):
 
     return solution
 
-# TODO : Random solution
-# TODO : Other solution
+
+def generate_only_wrong_coordinates(wrong_fragments_numbers, target):
+    NUMBER_OF_WRONG_FRAGMENTS = random.randint(5, 15)
+
+    # Add a litle random variation to the target coordinates
+    solution = generate_close_to_target_solution(
+        target[:NUMBER_OF_WRONG_FRAGMENTS])
+
+    for solution_fragment in solution:
+        solution_fragment['num'] = random.choice(wrong_fragments_numbers)
+
+    return solution
 
 
 # ========= Main =========
 # Create the solution folder if it doesn't exist
-if not os.path.exists(SOLUTION_FOLDER_PATH):
-    os.makedirs(SOLUTION_FOLDER_PATH)
-else:
+if os.path.exists(SOLUTION_FOLDER_PATH):
     # Delete all the solutions
-    os.system("rm " + SOLUTION_FOLDER_PATH + "*")
+    os.system("rm -r " + SOLUTION_FOLDER_PATH)
+
+os.makedirs(SOLUTION_FOLDER_PATH)
 
 # Generate the solutions
-target_fragments = load_fragments()
+save_solution([], "solution_empty")
+target_fragments = load_fragments("../fragments.txt")
+save_solution(target_fragments, "solution_good")
 
 for i in range(NB_CLOSE_SOLUTIONS):
     solution = generate_close_to_target_solution(target_fragments)
@@ -107,6 +110,8 @@ for i in range(NB_CLOSE_SOLUTIONS):
     save_solution(solution, solution_file_name)
 
 wrong_fragments_numbers = load_wrong_fragments_numbers()
+save_solution(generate_only_wrong_coordinates(
+    wrong_fragments_numbers, target_fragments), "solution_only_wrong")
 for i in range(NB_NOT_SO_CLOSE_SOLUTIONS):
     solution = generate_not_so_close_to_target_solution(
         target_fragments, wrong_fragments_numbers)
