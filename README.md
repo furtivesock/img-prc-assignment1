@@ -39,7 +39,7 @@ git clone https://github.com/furtivesock/img-prc-assignment1.git
   - [Fragments images folder `frag_eroded`](http://hebergement.u-psud.fr/emi/TIPolytech/TP1/frag_eroded.zip) (unzip it)
   - [Full fresco `Michelangelo_ThecreationofAdam_1707x775.jpg`](http://hebergement.u-psud.fr/emi/TIPolytech/TP1/Michelangelo_ThecreationofAdam_1707x775.jpg)
 
-You can see the organization needed above.
+You can see the organization needed [above](#file-tree).
 
 ## Exercise 1
 
@@ -83,10 +83,22 @@ python3 solution_generator.py
 ls ../solutions # to see the solutions content
 ```
 
-3. Run the script
+3. If you don't want to use our generated solutions but your own solution text files, you need to provide them in a `solutions/` folder (see [file tree](#file-tree)). 
+
+The `ex2.py` loads all solutions in this folder.
+
+The format required is the same as `fragments_s.txt`. For each fragment to place on the fresco, follow this row format :
+
+```
+[fragment number] [x (int)] [y (int)] [deg (double)]
+```
+
+Each row must be separated by a line break.
+
+4. Run the script
 
 ```sh
-python3 ex2.py
+python3 ex2.py 
 ```
 
 or
@@ -94,4 +106,19 @@ or
 ```
 chmod +x ex2.py
 ./ex2.py
+```
+
+By default, the parameters used are $\Delta x = 4$ px, $\Delta y = 4$ px and $\Delta \alpha = 4°$ .
+But you can set your own parameters if you want :
+
+```sh
+python3 ex2.py [dx (px, int)] [dy (px, int)] [dalpha (deg, double)]
+# or
+./ex2.py [dx (px, int)] [dy (px, int)] [dalpha (deg, double)]
+```
+
+Example :
+
+```sh
+python3 ex2.py 3 3 4
 ```
