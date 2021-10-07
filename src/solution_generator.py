@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 import random
 from utils import load_fragments, load_wrong_fragments_numbers
