@@ -15,20 +15,19 @@ Run by providing the optional following parameters:
 Authors: Sophie Nguyen <sophie.nguyen@universite-paris-saclay.fr>, Tom Mansion <tom.mansion@universite-paris-saclay.fr>
 """
 
-# Default margins to make the coding easier
+# Default margins to make the debugging easier
 DX = 4
 DY = 4
 DALPHA = 4
 FRAGMENTS_FOLDER_PATH = "../frag_eroded/"
 
-
 class Margin:
     """Fragment margin of error set by user
 
     Attributes:
-        dx          Horizontal positioning margin (in pixels)
-        dy          Vertical positioning margin (in pixels)
-        dalpha      Orientation margin (in degrees)
+        dx (int):           Horizontal positioning margin (in pixels)
+        dy (int):           Vertical positioning margin (in pixels)
+        dalpha (double):    Orientation margin (in degrees)
     """
 
     def __init__(self, dx, dy, dalpha):
@@ -41,24 +40,24 @@ def surface(img) -> int:
     """Count the number of strictly non-transparent pixels (alpha channel = 255)
 
     Args:
-        img (array): Image to count
+        img (array):    Image to count
 
     Returns:
-        int: Number of non-transparent pixels
+        int:            Number of non-transparent pixels
     """
     return np.count_nonzero(img[:, :, 3] == 255)
 
 
 def is_fragment_wrong(fragment, incorrect_fragments_numbers) -> bool:
-    """Tels if a fragment is wrong or not
-    if the fragment numer is in the incorrect_fragments_numbers list, it is considered as wrong
+    """Tell if a fragment is wrong or not
+    If the fragment number is in the incorrect_fragments_numbers list, it is considered as wrong
 
     Args:
-        fragment (dict): fragment to check
-        incorrect_fragments_numbers (list): list of incorrect fragments numbers
+        fragment (dict):                        Fragment to check
+        incorrect_fragments_numbers (list):     List of incorrect fragments numbers
 
     Returns:
-        bool: True if the fragment is wrong, False otherwise
+        bool:                                   True if the fragment is wrong, False otherwise
     """
 
     if fragment["num"] in incorrect_fragments_numbers:
@@ -68,15 +67,15 @@ def is_fragment_wrong(fragment, incorrect_fragments_numbers) -> bool:
 
 
 def is_fragment_correct(fragment, correct_fragments, margin) -> bool:
-    """Tels if a fragment is correct or not
-    if the fragment coordinates differences are less than DX and DY, it is considered as correct
+    """Tells if a fragment is correct or not
+    If the fragment coordinates differences are less than Dx and Dy, it is considered as correct
 
     Args:
-        fragment (dict): fragment to check
-        correct_fragments (list): list of correct fragments
+        fragment (dict):            Fragment to check
+        correct_fragments (list):   List of correct fragments
 
     Returns:
-        bool: True if the fragment is correct, False otherwise
+        bool:                       True if the fragment is correct, False otherwise
     """
     # Get the coordinates of the correct fragment
     correct_fragment = next(
@@ -149,6 +148,6 @@ if __name__ == '__main__':
         p = max(0, math.ceil(100 * (well_located_surface -
                                     wrong_fragment_surface) / correct_surface))
 
-        print(f"{solution['name']}, with {wrong_fragments} wrong, {incorrect_fragments} incorrect, and {len(solution['fragments']) - wrong_fragments - incorrect_fragments}/{len(correct_fragments)} good fragments has a surface precision of {p}%")
+        print(f"{solution['name']}, with {wrong_fragments} wrong, {incorrect_fragments} incorrect, and {len(solution['fragments']) - wrong_fragments - incorrect_fragments}/{len(correct_fragments)} good fragments, has a surface precision of {p}%")
 
     # TODO (enhancement): Show exceeded pixels in red on the fresco

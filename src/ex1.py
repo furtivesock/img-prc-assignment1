@@ -14,8 +14,18 @@ FRAGMENTS_FOLDER_PATH = "../frag_eroded/"
 ORIGINAL_FILENAME = "Michelangelo_ThecreationofAdam_1707x775.jpg"
 ORIGINAL_IMAGE_OPACITY = 0.3
 
+def rotate_fragment(fragment_img, angle, cols_f, rows_f) -> np.array:
+    """Rotate a fragment by the angle
 
-def rotate_fragment(fragment_img, angle, cols_f, rows_f):
+    Args:
+        fragment_img (2D array):    Image of a fragment
+        angle (double):             Angle (in radians) to rotate
+        cols_f (int):               Fragment width
+        rows_f (int):               Fragment height
+
+    Returns:
+        2D array: Rotated fragment
+    """
     # Calculate the coordinates of the center of the fragment
     certer_coordinates = ((cols_f - 1) / 2.0, (rows_f - 1) / 2.0)
     # Create a rotation matrix
@@ -25,8 +35,17 @@ def rotate_fragment(fragment_img, angle, cols_f, rows_f):
         fragment_img, M_rotation, (cols_f, rows_f))
     return rotated_fragment
 
-
 def add_fragment_to_target_image(fragment_info, fragment_img, target_image, target_width, target_height) -> None:
+    """Place a rotated fragment on the fresco 
+    by filling the background pixels on the right position with fragment ones
+
+    Args:
+        fragment_info (object):     Fragment settings: coordinates (x, y)
+        fragment_img (2D array):    Image of a fragment 
+        target_image (2D array):    Original fresco background
+        target_width (int):         Fresco width
+        target_height (int):        Fresco height
+    """
     fragment_coord_y = 0
     fragment_coord_x = 0
 
@@ -43,10 +62,10 @@ def add_fragment_to_target_image(fragment_info, fragment_img, target_image, targ
             # Because target image is in JPG (R, G, B) and fragment_image if alpha > 0 (non-transparent) --> add pixel to target_image
             if pixel[3] > 200:
                 # The alpha is > 0 : the pixel isn't tranparent
-                # Calculate the x coodinate of the fragment pixel on the target image
+                # Calculate the x coordinate of the fragment pixel on the target image
                 target_image_fragment_x = fragment_info["x"] - int(
                     fragment_img.shape[1] / 2) + fragment_coord_x
-                # Check that we are the fragment image isn't going to be out of the image
+                # Check that the fragment image isn't going to be out of the image
                 if target_image_fragment_x < 0 or target_image_fragment_x >= target_width:
                     continue
 
@@ -81,7 +100,7 @@ if __name__ == '__main__':
         fragment_img = cv.imread(cv.samples.findFile(
             FRAGMENTS_FOLDER_PATH + fragment["image_name"]), cv.IMREAD_UNCHANGED)
 
-        # Get fragment size (matrix length)
+        # Get fragment size (matrix size)
         cols_f, rows_f, _ = fragment_img.shape
         print(
             f"name: {fragment['image_name']}, x: {fragment['x']}, y: {fragment['y']}, h: {cols_f}, w: {cols_f}")
