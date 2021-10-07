@@ -9,11 +9,6 @@ This file contains instructions for using it (report extract).
 ## Prerequisites
 
 - Python 3
-- As images are not included in the repository, you need to download the following files and put them in the project root :
-  - [Fragments images folder `frag_eroded`](http://hebergement.u-psud.fr/emi/TIPolytech/TP1/frag_eroded.zip) (unzip it)
-  - [Full fresco `Michelangelo_ThecreationofAdam_1707x775.jpg`](http://hebergement.u-psud.fr/emi/TIPolytech/TP1/Michelangelo_ThecreationofAdam_1707x775.jpg)
-
-You can see the organization needed below.
 
 ## File tree
 
@@ -34,11 +29,17 @@ img-prc-assignment1
 
 ## Installation
 
-Clone the project first :
+1. Clone the project first
 
 ```sh
 git clone https://github.com/furtivesock/img-prc-assignment1.git
 ```
+
+2. As images are not included in the repository, you need to download the following files and put them in the project root :
+  - [Fragments images folder `frag_eroded`](http://hebergement.u-psud.fr/emi/TIPolytech/TP1/frag_eroded.zip) (unzip it)
+  - [Full fresco `Michelangelo_ThecreationofAdam_1707x775.jpg`](http://hebergement.u-psud.fr/emi/TIPolytech/TP1/Michelangelo_ThecreationofAdam_1707x775.jpg)
+
+You can see the organization needed above.
 
 ## Exercise 1
 
