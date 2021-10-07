@@ -11,7 +11,7 @@ This file contains instructions for using it (report extract).
 - Python 3
 - As images are not included in the repository, you need to download the following files and put them in the project root :
   - [Fragments images folder `frag_eroded`](http://hebergement.u-psud.fr/emi/TIPolytech/TP1/frag_eroded.zip) (unzip it)
-  - [Full fresco](http://hebergement.u-psud.fr/emi/TIPolytech/TP1/Michelangelo_ThecreationofAdam_1707x775.jpg)
+  - [Full fresco `Michelangelo_ThecreationofAdam_1707x775.jpg`](http://hebergement.u-psud.fr/emi/TIPolytech/TP1/Michelangelo_ThecreationofAdam_1707x775.jpg)
 
 You can see the organization needed below.
 
