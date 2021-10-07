@@ -128,9 +128,9 @@ if os.path.exists(SOLUTION_FOLDER_PATH):
 os.makedirs(SOLUTION_FOLDER_PATH)
 
 # Generate the solutions
-save_solution([], "solution_empty")
+save_solution([], "solution_empty.txt")
 target_fragments = load_fragments("../fragments.txt")
-save_solution(target_fragments, "solution_good")
+save_solution(target_fragments, "solution_good.txt")
 
 for i in range(NB_CLOSE_SOLUTIONS):
     solution = generate_close_to_target_solution(target_fragments)
@@ -139,7 +139,7 @@ for i in range(NB_CLOSE_SOLUTIONS):
 
 wrong_fragments_numbers = load_wrong_fragments_numbers()
 save_solution(generate_only_wrong_coordinates(
-    wrong_fragments_numbers, target_fragments), "solution_only_wrong")
+    wrong_fragments_numbers, target_fragments), "solution_only_wrong.txt")
 for i in range(NB_NOT_SO_CLOSE_SOLUTIONS):
     solution = generate_not_so_close_to_target_solution(
         target_fragments, wrong_fragments_numbers)
