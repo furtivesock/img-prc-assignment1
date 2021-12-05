@@ -21,6 +21,7 @@ DY = 4
 DALPHA = 4
 FRAGMENTS_FOLDER_PATH = "../frag_eroded/"
 
+
 class Margin:
     """Fragment margin of error set by user
 
@@ -148,6 +149,8 @@ if __name__ == '__main__':
         p = max(0, math.ceil(100 * (well_located_surface -
                                     wrong_fragment_surface) / correct_surface))
 
-        print(f"{solution['name']}, with {wrong_fragments} wrong, {incorrect_fragments} incorrect, and {len(solution['fragments']) - wrong_fragments - incorrect_fragments}/{len(correct_fragments)} good fragments, has a surface precision of {p}%")
+        nb_missing_fragments = len(correct_fragments) - len(solution["fragments"])
+
+        print(f"{solution['name']}, with {nb_missing_fragments} missing, {wrong_fragments} wrong, {incorrect_fragments} incorrect, and {len(solution['fragments']) - wrong_fragments - incorrect_fragments}/{len(correct_fragments)} good fragments, has a surface precision of {p}%")
 
     # TODO (enhancement): Show exceeded pixels in red on the fresco
